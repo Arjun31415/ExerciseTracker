@@ -8,10 +8,13 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "dotenv": "^8.6.0",
     "express": "^4.17.2",
-    "nodemon": "^2.0.15"
+    "mongoose": "^6.2.1",
+    "nodemon": "^2.0.15",
+    "pino": "^7.6.5"
   },
   "repository": {
     "url": ""
@@ -23,6 +26,10 @@
   ],
   "devDependencies": {
     "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-prettier": "^0.0.0-empty",
     "prettier": "^2.5.1"
   }
