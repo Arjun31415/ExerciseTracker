@@ -4,7 +4,12 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const logger = require('pino')();
+const logger = require('pino')({
+  transport: {
+    target: 'pino-pretty',
+  },
+  level: 'debug',
+});
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
@@ -48,9 +53,8 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-  logger.info(req.body);
-  console.log(req.body);
-  // res.send('Post Request');
+  logger.debug(req.body);
+
   const curUser = new User({ username: req.body.username });
   await curUser.save(async (err) => {
     if (err && err.code !== 11000) {
