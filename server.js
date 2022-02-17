@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-  logger.debug(req.body);
+  // logger.debug(req.body);
 
   const curUser = new User({ username: req.body.username });
   await curUser.save(async (err) => {
@@ -67,7 +67,7 @@ app.post('/api/users', async (req, res) => {
       return res.json({ message: 'Another Error occurred', err });
     }
     if (err && err.code === 11000) {
-      logger.error(err);
+      //   logger.error(err);
       logger.info('User Already Exists');
       return User.findOne({ username: req.body.username }).then((value) =>
         res.json({ _id: value._id, username: value.username }),
@@ -78,15 +78,13 @@ app.post('/api/users', async (req, res) => {
 });
 
 app.post('/api/users/:_id/exercises', async (req, res) => {
-  logger.debug('POSTING EXERSISE \n\n');
+  // logger.debug('POSTING EXERSISE \n\n');
   const { _id: userId } = req.params;
-  logger.debug({ userId });
-  logger.debug(req.body);
   const curUser = await User.findById(userId);
-  logger.debug('Current User\n');
-  logger.debug(curUser);
+  // logger.debug('Current User\n');
+  // logger.debug(curUser);
   let gotDate;
-  logger.debug({ gotDate: req.body.date });
+  // logger.debug({ gotDate: req.body.date });
   if (req.body.date) {
     gotDate = new Date(req.body.date);
   } else {
@@ -118,13 +116,36 @@ app.get('/api/users/:_id/logs', async (req, res) => {
   logger.debug({ userId, from, to, limit });
   const curUser = await User.findById(userId);
   logger.debug({ username: curUser.username });
-  if (curUser.username === 'fcc_test_16450907447') logger.debug('Yes same');
-  const exercises = await Exersise.find({ username: curUser.username }).exec();
-  logger.debug({ exercises });
+  let query = { username: curUser.username };
+  if (to) {
+    const toDateString = new Date(to).toDateString();
+    query = { ...query, date: { $lte: toDateString } };
+  }
+  if (from) {
+    const fromDateString = new Date(to).toDateString();
+    query = { ...query, date: { $lte: fromDateString } };
+  }
+  logger.debug({ query });
+  let exersises;
+  if (limit) {
+    logger.info(`Limiting to ${limit}`);
+    exersises = await Exersise.find(query).limit(limit).exec();
+  } else {
+    exersises = await Exersise.find(query).exec();
+  }
+  logger.debug({ exersises });
   return res.send({
-    ...curUser._doc,
-    count: exercises.length,
-    log: [...exercises],
+    _id: curUser._id,
+    username: curUser.username,
+
+    count: exersises.length,
+    log: [
+      ...exersises.map((ex) => ({
+        description: ex.description,
+        date: new Date(ex.date).toDateString(),
+        duration: parseInt(ex.duration, 10),
+      })),
+    ],
   });
 });
 const listener = app.listen(process.env.PORT || 3000, async () => {
